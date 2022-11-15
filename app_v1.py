@@ -10,7 +10,7 @@ from datetime import datetime
 # DATA_URL = ('bureau.csv')
 @st.cache
 def load_data():
-    data = pd.read_pickle(r'C:\Users\chouc\openclassrooms\projet7\data_for_app.pickle')
+    data = pd.read_pickle(r'./data_for_app.pickle')
     data.reset_index(drop=True, inplace=True)
     # data['Date'] = pd.to_datetime(data['Date']).dt.strftime('%Y-%m-%d')
     return data
