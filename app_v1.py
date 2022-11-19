@@ -68,26 +68,41 @@ def advancedSearchClient():
 # ----- BEGIN : showSelectedClientInfo -----
 def showSelectedClientInfo(selectedClientId):
     # Search results
-    st.write('<i class="fa-solid fa-square-poll-horizontal"></i> Client application data:', unsafe_allow_html=True)
+    st.write('<i class="fa-solid fa-square-poll-horizontal"></i> Client application data :', unsafe_allow_html=True)
     # selectedClient
     clientDf = df[df['SK_ID_CURR'] == selectedClientId]
 
     # gender icon
-    gender_icon = '<i class="fa-solid fa-person fa-4x"></i> Male'
-    if clientDf['CODE_GENDER_y'].iloc[0] == 'F':
-        gender_icon = '<i class="fa-solid fa-person-dress fa-4x"></i> Female'
+    clientInfoTemplate = """
+    <div style="display: flex;" >
+        <div style="width: 18%; text-align: center;">
+          <i class="fa-solid {} fa-5x"></i>
+        </div>
+        <div style="width: 75%; padding-left: 1em;">
+           <b style="background-color: aliceblue; padding: 0 0.2em; border-radius: 21px;"> {} </b>
+           <div> {} </div>
+           <div> {} </div>
+        </div>
+    </div>
+    """
+
+    gender = "Female" if clientDf['CODE_GENDER_y'].iloc[0] == 'F' else "Male"
+    gender_icon = "fa-person-dress" if clientDf['CODE_GENDER_y'].iloc[0] == 'F' else "fa-person"
+    clientInfo = clientInfoTemplate.format(gender_icon, str(selectedClientId), gender, clientDf['NAME_EDUCATION_TYPE'].iloc[0])
+
     col1, col2, col3 = st.columns(3)
-    col1.write(gender_icon, unsafe_allow_html=True)
-    with col2:
-        col2.metric(label="Loan id", value=selectedClientId)
+    col1.write(clientInfo, unsafe_allow_html=True)
+    col2.metric(label=clientDf['NAME_INCOME_TYPE'].iloc[0], value= "%.0f" % clientDf['AMT_INCOME_TOTAL'].iloc[0])
     col3.metric(label="Credit Amount", value= int(clientDf['AMT_CREDIT']))
 
     col1, col2, col3 = st.columns(3)
-    col1.metric(label="probabilité que le client rembourse son crédit", value= "%.2f" % clientDf['predict_proba_0'])
-    col2.metric(label="probabilité que le client ne rembourse pas son crédit", value= "%.2f" % clientDf['predict_proba_1'])
+    col1.metric(label="probabilité que le client rembourse son crédit", value= "%.4f" % clientDf['predict_proba_0'])
+    col2.metric(label="probabilité que le client ne rembourse pas son crédit", value= "%.4f" % clientDf['predict_proba_1'])
     col3.metric(label="Difficulté de paiement", value= int(clientDf['y_pred']))
 
-    st.write('Client application data:', df[df['SK_ID_CURR'] == selectedClientId])
+    with st.expander("See More:"):
+        st.write(df[df['SK_ID_CURR'] == selectedClientId])
+
 # ----- END : showSelectedClientInfo -----
 
 
