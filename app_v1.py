@@ -91,10 +91,10 @@ def showSelectedClientInfo(selectedClientId):
     clientInfoTemplate = """
     <div style="display: flex;" >
         <div style="width: 18%; text-align: center;">
-          <i class="fa-solid {} fa-5x"></i>
+          <i class="fa-solid {} fa-6x"></i>
         </div>
         <div style="width: 75%; padding-left: 1em;">
-           <b style="background-color: aliceblue; padding: 0 0.2em; border-radius: 21px;"> {} </b>
+           <b style="font-size: 28px; background-color: aliceblue; padding: 0 0.2em; border-radius: 21px;"> {} </b>
            <div> {} </div>
            <div> {} </div>
         </div>
@@ -118,11 +118,24 @@ def showSelectedClientInfo(selectedClientId):
         <div data-testid="stMetricValue" class="css-1xarl3l e16fv1kl1">
             <div class="css-50ug3q e16fv1kl3"> {} </div>
         </div>
+        <label data-testid="stMetricLabel" class="css-186pv6d e16fv1kl2">
+            <div class="css-50ug3q e16fv1kl3">
+                Average income for same type is
+                <b style="background-color: aliceblue; padding: 0 0.2em; border-radius: 21px;"> {} </b>
+            </div>
+        </label>
     </div>
     """
-    col2.write(incomeTemplate.format(clientDf['NAME_INCOME_TYPE'].iloc[0], "%.0f" % clientDf['AMT_INCOME_TOTAL'].iloc[0]), unsafe_allow_html=True)
+    col2.write(
+        incomeTemplate.format(
+            clientDf['NAME_INCOME_TYPE'].iloc[0],
+            "%.0f" % clientDf['AMT_INCOME_TOTAL'].iloc[0],
+            "%.0f" % df[df['NAME_INCOME_TYPE']== clientDf['NAME_INCOME_TYPE'].iloc[0]]["AMT_INCOME_TOTAL"].mean()
+        ),
+        unsafe_allow_html=True
+    )
     col3.metric(label="Credit Amount", value= int(clientDf['AMT_CREDIT']))
-
+    st.empty()
     col1, col2, col3 = st.columns(3)
     col1.metric(label="probabilité que le client rembourse son crédit", value= "%.4f" % clientDf['predict_proba_0'])
     col2.metric(label="probabilité que le client ne rembourse pas son crédit", value= "%.4f" % clientDf['predict_proba_1'])
