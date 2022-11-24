@@ -21,17 +21,34 @@ st.title('Dashboard interactif pour la société < Prêt à dépenser > ')
 st.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> ',
          unsafe_allow_html=True)
 
+# @st.cache
+# def load_columns_description():
+#     df_columns_description_path = "data/HomeCredit_columns_description.csv"
+#     return pd.read_csv(df_columns_description_path, encoding='latin')
+#
+# df_columns_description = load_columns_description()
+# # st.write('df_columns_description', df_columns_description)
+# df_columns_description[df_columns_description['Row'] == 'AMT_CREDIT_SUM_DEBT']
 
 # ----- BEGIN : load_data -----
 @st.cache
 def load_data():
-    data = pd.read_pickle(r'./data_for_dashboard.pickle')
+    data = pd.read_pickle(r'./data/data_for_dashboard.pickle')
     data.reset_index(drop=True, inplace=True)
     # data['Date'] = pd.to_datetime(data['Date']).dt.strftime('%Y-%m-%d')
     return data
 df = load_data()
+
 # ----- END : load_data -----
 
+@st.cache
+def load_bureau_and_balance():
+    data = pd.read_pickle(r'./data/bureau_for_app.pickle')
+    data.reset_index(drop=False, inplace=True)
+    # data['Date'] = pd.to_datetime(data['Date']).dt.strftime('%Y-%m-%d')
+    return data
+df_bureau_and_balance = load_bureau_and_balance()
+# st.write('df_bureau_and_balance', df_bureau_and_balance.head())
 
 # ----- BEGIN : communSearchClient -----
 def communSearchClient():
@@ -41,7 +58,6 @@ def communSearchClient():
     selectboxList = list(selectClientDf["SELECT_BOX_TEXT"])
     selectedText = st.selectbox('Select client id', selectboxList)
     selectedClientId1 = selectClientDf[selectClientDf['SELECT_BOX_TEXT'] == selectedText]['SK_ID_CURR'].iloc[0]
-    print('client id in commun search', selectedClientId1)
     return selectedClientId1
 # ----- END : communSearchClient -----
 
@@ -61,7 +77,6 @@ def advancedSearchClient():
                                    pd.unique(df[df[filter1['column']] == selectedFilter1][filter2['column']]))
     selectedClientId2 = col3.selectbox('Select client id', pd.unique(
         df[(df[filter1['column']] == selectedFilter1) & (df[filter2['column']] == selectFilter2)]['SK_ID_CURR']))
-    print('client id in advanced search', selectedClientId2)
     return selectedClientId2
 # ----- END : advancedSearchClient -----
 
@@ -92,7 +107,20 @@ def showSelectedClientInfo(selectedClientId):
 
     col1, col2, col3 = st.columns(3)
     col1.write(clientInfo, unsafe_allow_html=True)
-    col2.metric(label=clientDf['NAME_INCOME_TYPE'].iloc[0], value= "%.0f" % clientDf['AMT_INCOME_TOTAL'].iloc[0])
+    incomeTemplate = """
+    <div data-testid="metric-container">
+        <label data-testid="stMetricLabel" class="css-186pv6d e16fv1kl2">
+            <div class="css-50ug3q e16fv1kl3">
+                Income of the client as 
+                <b style="background-color: aliceblue; padding: 0 0.2em; border-radius: 21px;"> {} </b>:
+            </div>
+        </label>
+        <div data-testid="stMetricValue" class="css-1xarl3l e16fv1kl1">
+            <div class="css-50ug3q e16fv1kl3"> {} </div>
+        </div>
+    </div>
+    """
+    col2.write(incomeTemplate.format(clientDf['NAME_INCOME_TYPE'].iloc[0], "%.0f" % clientDf['AMT_INCOME_TOTAL'].iloc[0]), unsafe_allow_html=True)
     col3.metric(label="Credit Amount", value= int(clientDf['AMT_CREDIT']))
 
     col1, col2, col3 = st.columns(3)
@@ -102,6 +130,74 @@ def showSelectedClientInfo(selectedClientId):
 
     with st.expander("See More:"):
         st.write(df[df['SK_ID_CURR'] == selectedClientId])
+
+    st.write('<i class="fa-solid fa-building-columns"></i> Credit bureau information for client:', unsafe_allow_html=True)
+    df_bureau_and_balance_for_client = df_bureau_and_balance[df_bureau_and_balance['SK_ID_CURR'] == selectedClientId]
+    if len(df_bureau_and_balance_for_client) == 0 :
+        st.write("""
+            <div style="width: 50%; margin: 0 auto;">
+                 <i class="fa-solid fa-broom"></i> 
+                 There is no recoded previous Credit Bureau credit related to our loan !
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric(label="Total credit amount (active and closed) in all credit bureau:", value= "%.2f" % df_bureau_and_balance_for_client['BURO_AMT_CREDIT_SUM_SUM'])
+            pie = go.Figure(data=[go.Pie(hole=.3,
+                                         labels = ['Total Active credits amount', 'Total Closed credits amount'],
+                                         values = [ "%.2f" % df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_SUM'],  "%.2f" % df_bureau_and_balance_for_client['CLOSED_AMT_CREDIT_SUM_SUM']])])
+
+            pie.update_traces(hoverinfo='label+percent',
+                              textinfo='percent+value',
+                              textfont_size=20,
+                              marker=dict(colors=['gold', 'mediumturquoise', 'darkorange', 'lightgreen'], line=dict(color='#000000', width=2)))
+            st.plotly_chart(pie, use_container_width=True)
+
+        with col2:
+            remainingDebtTemplate = """
+            <div data-testid="metric-container">
+                <label data-testid="stMetricLabel" class="css-186pv6d e16fv1kl2">
+                    <div class="css-50ug3q e16fv1kl3">Total remaining debt:</div>
+                </label>
+                <div data-testid="stMetricValue" class="css-1xarl3l e16fv1kl1">
+                    <div class="css-50ug3q e16fv1kl3"> {} </div>
+                </div>
+                <label data-testid="stMetricLabel" class="css-186pv6d e16fv1kl2">
+                    <div class="css-50ug3q e16fv1kl3">
+                        represents
+                        <b style="background-color: #ff8c00a3; padding: 0 0.2em; border-radius: 21px;"> {}%</b>
+                        of active current total credit amount 
+                        <b style="background-color: #ffe24794; padding: 0 0.2em; border-radius: 21px;"> {} </b>,
+                        to pay in 
+                        <b style="background-color: aliceblue; padding: 0 0.2em; border-radius: 21px;"> {} </b>
+                        Days
+                    </div>
+                </label>
+            </div>
+            """
+
+            remainingDebtSummary = remainingDebtTemplate.format("%.2f" % df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_DEBT_SUM'],
+                                                                "%.2f" % ((float(df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_DEBT_SUM']) / float(df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_SUM'])) * 100),
+                                                                "%.2f" % df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_SUM'],
+                                                                "%.0f" % df_bureau_and_balance_for_client['ACTIVE_DAYS_CREDIT_ENDDATE_MAX'])
+            st.write(remainingDebtSummary, unsafe_allow_html=True)
+
+            pie = go.Figure(data=[go.Pie(labels = ['Total remaining debt', 'Total paid debt'],
+                                         values = [ float(df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_DEBT_SUM']),
+                                                    float(df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_SUM']) - float(df_bureau_and_balance_for_client['ACTIVE_AMT_CREDIT_SUM_DEBT_SUM'])
+                                                    ],
+                                         pull=[0, 0.2])])
+
+            pie.update_traces(hoverinfo='label+percent',
+                              textinfo='percent+value',
+                              textfont_size=20,
+                              marker=dict(colors=['darkorange', 'gold'], line=dict(color='#000000', width=2)))
+            st.plotly_chart(pie, use_container_width=True)
+
+        with st.expander("bureau and balance:"):
+            st.write(df_bureau_and_balance_for_client)
+
 
 # ----- END : showSelectedClientInfo -----
 
@@ -148,19 +244,17 @@ with st.container():
         xaxis=dict(title='Montant crédit'),
                           yaxis=dict(title='Density'),
                           barmode='overlay')
-        st.write(fig)
-
+        st.plotly_chart(fig, use_container_width=True)
     #
     with fig_col2:
         st.markdown("### Second Chart")
         fig2 = px.histogram(data_frame=df, x='NAME_INCOME_TYPE')
-        st.write(fig2)
-
+        st.plotly_chart(fig2, use_container_width=True)
 
     st.subheader('Third chart')
     pie = go.Figure(data=[go.Pie(labels = df['NAME_EDUCATION_TYPE'].value_counts().keys(),
                                  values = df['NAME_EDUCATION_TYPE'].value_counts().values)])
 
-    st.write(pie)
+    st.plotly_chart(pie, use_container_width=True)
 
 # ----- END : MAIN CODE -----
