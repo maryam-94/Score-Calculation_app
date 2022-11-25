@@ -136,6 +136,7 @@ def showSelectedClientInfo(selectedClientId):
     )
     col3.metric(label="Credit Amount", value= int(clientDf['AMT_CREDIT']))
     st.empty()
+    showClientChartComparison()
     col1, col2, col3 = st.columns(3)
     col1.metric(label="probabilité que le client rembourse son crédit", value= "%.4f" % clientDf['predict_proba_0'])
     col2.metric(label="probabilité que le client ne rembourse pas son crédit", value= "%.4f" % clientDf['predict_proba_1'])
@@ -211,31 +212,26 @@ def showSelectedClientInfo(selectedClientId):
         with st.expander("bureau and balance:"):
             st.write(df_bureau_and_balance_for_client)
 
-
-# ----- END : showSelectedClientInfo -----
-
-
-# ----- BEGIN : MAIN CODE -----
-with st.container():
-    tab1, tab2 = st.tabs(["Basic Search", "Advanced Search"])
-
-    with tab1:
-        selectedClientId1 = communSearchClient()
-        showSelectedClientInfo(selectedClientId1)
-    with tab2:
-        selectedClientId2 = advancedSearchClient()
-        showSelectedClientInfo(selectedClientId2)
-
-st.markdown("""---""")
-
-with st.container():
-    st.header('Filter on clients by:')
-
+def showClientChartComparison():
     # create two columns for charts
-    fig_col1, fig_col2 = st.columns(2)
+    fig_col1, fig_col2, fig_col3 = st.columns(3)
 
-    with fig_col1:
-        st.markdown("### First Chart")
+    #
+    df_mean = df[['NAME_INCOME_TYPE', 'AMT_INCOME_TOTAL', 'AMT_CREDIT']].groupby('NAME_INCOME_TYPE').mean()
+    df_mean.reset_index(drop=False, inplace=True)
+
+    with fig_col2:
+        # st.write(df_mean)
+        fig2 = px.histogram(data_frame=df_mean,
+                            x='NAME_INCOME_TYPE',
+                            y='AMT_INCOME_TOTAL',
+                            title='Average income per type for all clients',
+                            labels={'x': 'Income Type', 'y': 'Average income'}
+        )
+        st.plotly_chart(fig2, use_container_width=True)
+
+
+    with fig_col3:
         # fig = px.density_heatmap(
         #     data_frame=df, y='AMT_CREDIT', x='CODE_GENDER_y'
         # )
@@ -258,16 +254,32 @@ with st.container():
                           yaxis=dict(title='Density'),
                           barmode='overlay')
         st.plotly_chart(fig, use_container_width=True)
+    # st.subheader('Third chart')
+    # pie = go.Figure(data=[go.Pie(labels = df['NAME_EDUCATION_TYPE'].value_counts().keys(),
+    #                              values = df['NAME_EDUCATION_TYPE'].value_counts().values)])
     #
-    with fig_col2:
-        st.markdown("### Second Chart")
-        fig2 = px.histogram(data_frame=df, x='NAME_INCOME_TYPE')
-        st.plotly_chart(fig2, use_container_width=True)
+    # st.plotly_chart(pie, use_container_width=True)
 
-    st.subheader('Third chart')
-    pie = go.Figure(data=[go.Pie(labels = df['NAME_EDUCATION_TYPE'].value_counts().keys(),
-                                 values = df['NAME_EDUCATION_TYPE'].value_counts().values)])
 
-    st.plotly_chart(pie, use_container_width=True)
+# ----- END : showSelectedClientInfo -----
+
+
+# ----- BEGIN : MAIN CODE -----
+with st.container():
+    tab1, tab2 = st.tabs(["Basic Search", "Advanced Search"])
+
+    with tab1:
+        selectedClientId1 = communSearchClient()
+        showSelectedClientInfo(selectedClientId1)
+    with tab2:
+        selectedClientId2 = advancedSearchClient()
+        showSelectedClientInfo(selectedClientId2)
+
+st.markdown("""---""")
+
+# with st.container():
+#     st.header('Filter on clients by:')
+
+
 
 # ----- END : MAIN CODE -----
