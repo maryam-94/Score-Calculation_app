@@ -136,7 +136,7 @@ def showSelectedClientInfo(selectedClientId):
     )
     col3.metric(label="Credit Amount", value= int(clientDf['AMT_CREDIT']))
     st.empty()
-    showClientChartComparison()
+    showClientChartComparison(clientDf['NAME_EDUCATION_TYPE'].iloc[0])
     col1, col2, col3 = st.columns(3)
     col1.metric(label="probabilité que le client rembourse son crédit", value= "%.4f" % clientDf['predict_proba_0'])
     col2.metric(label="probabilité que le client ne rembourse pas son crédit", value= "%.4f" % clientDf['predict_proba_1'])
@@ -212,16 +212,32 @@ def showSelectedClientInfo(selectedClientId):
         with st.expander("bureau and balance:"):
             st.write(df_bureau_and_balance_for_client)
 
-def showClientChartComparison():
-    # create two columns for charts
+def showClientChartComparison(clientEducationType):
     fig_col1, fig_col2, fig_col3 = st.columns(3)
+    with fig_col1:
+        df_education_type_count = df['NAME_EDUCATION_TYPE'].value_counts()
+        labels = df_education_type_count.index.tolist()
+        values = df_education_type_count.values.tolist()
+        clientValueIndex = labels.index(clientEducationType)
+        pull = [0] * len(labels)
+        pull[clientValueIndex] = 0.2
+        pie = go.Figure(data=[go.Pie(labels=labels, values=values, pull=pull)])
 
-    #
-    df_mean = df[['NAME_INCOME_TYPE', 'AMT_INCOME_TOTAL', 'AMT_CREDIT']].groupby('NAME_INCOME_TYPE').mean()
-    df_mean.reset_index(drop=False, inplace=True)
-
+        pie.update_layout(margin=dict(l=20, r=20, t=60, b=20),
+                          legend=dict(
+                                     orientation="h",
+                                     yanchor="bottom",
+                                     y=1.02,
+                                     xanchor="right",
+                                     x=1
+                          )
+                        )
+        pie.update_traces(hoverinfo='label+percent',
+                          marker=dict(colors=['gold', 'mediumturquoise', 'darkorange', 'lightgreen']))
+        st.plotly_chart(pie, use_container_width=True)
     with fig_col2:
-        # st.write(df_mean)
+        df_mean = df[['NAME_INCOME_TYPE', 'AMT_INCOME_TOTAL', 'AMT_CREDIT']].groupby('NAME_INCOME_TYPE').mean()
+        df_mean.reset_index(drop=False, inplace=True)
         fig2 = px.histogram(data_frame=df_mean,
                             x='NAME_INCOME_TYPE',
                             y='AMT_INCOME_TOTAL',
@@ -261,19 +277,13 @@ def showClientChartComparison():
                           yaxis=dict(title='Density'),
                           barmode='overlay')
         st.plotly_chart(fig, use_container_width=True)
-    # st.subheader('Third chart')
-    # pie = go.Figure(data=[go.Pie(labels = df['NAME_EDUCATION_TYPE'].value_counts().keys(),
-    #                              values = df['NAME_EDUCATION_TYPE'].value_counts().values)])
-    #
-    # st.plotly_chart(pie, use_container_width=True)
-
 
 # ----- END : showSelectedClientInfo -----
 
 
 # ----- BEGIN : MAIN CODE -----
 with st.container():
-    tab1, tab2 = st.tabs(["Basic Search", "Advanced Search"])
+    tab1, tab2, tab3 = st.tabs(["Basic Search", "Advanced Search", "More information"])
 
     with tab1:
         selectedClientId1 = communSearchClient()
@@ -281,12 +291,10 @@ with st.container():
     with tab2:
         selectedClientId2 = advancedSearchClient()
         showSelectedClientInfo(selectedClientId2)
+    with tab3:
+        pie = go.Figure(data=[go.Pie(labels = df['NAME_EDUCATION_TYPE'].value_counts().keys(),
+                                     values = df['NAME_EDUCATION_TYPE'].value_counts().values)])
 
-st.markdown("""---""")
-
-# with st.container():
-#     st.header('Filter on clients by:')
-
-
+        st.plotly_chart(pie, use_container_width=True)
 
 # ----- END : MAIN CODE -----
