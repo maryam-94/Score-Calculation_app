@@ -226,8 +226,9 @@ def showClientChartComparison():
                             x='NAME_INCOME_TYPE',
                             y='AMT_INCOME_TOTAL',
                             title='Average income per type for all clients',
-                            labels={'x': 'Income Type', 'y': 'Average income'}
-        )
+                            labels={'NAME_INCOME_TYPE': 'Income Type', 'AMT_INCOME_TOTAL': 'Average income'}
+        ).update_layout(margin=dict(l=20, r=20, t=60, b=20),
+                        yaxis_title="Average income")
         st.plotly_chart(fig2, use_container_width=True)
 
 
@@ -246,10 +247,16 @@ def showClientChartComparison():
                                  show_curve=True
                                  )
         fig.update_layout(autosize=False,
-        width=600,
-        height=400,
-
-
+        margin=dict(l=20, r=20, t=20, b=20),
+        # width=600,
+        # height=400,
+        legend=dict(
+             orientation="h",
+             yanchor="bottom",
+             y=1.02,
+             xanchor="right",
+             x=1
+        ),
         xaxis=dict(title='Montant crédit'),
                           yaxis=dict(title='Density'),
                           barmode='overlay')
