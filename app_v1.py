@@ -291,10 +291,10 @@ with st.container():
     with tab2:
         selectedClientId2 = advancedSearchClient()
         showSelectedClientInfo(selectedClientId2)
-    with tab3:
-        pie = go.Figure(data=[go.Pie(labels = df['NAME_EDUCATION_TYPE'].value_counts().keys(),
-                                     values = df['NAME_EDUCATION_TYPE'].value_counts().values)])
-
-        st.plotly_chart(pie, use_container_width=True)
+    # with tab3:
+    #     pie = go.Figure(data=[go.Pie(labels = df['NAME_EDUCATION_TYPE'].value_counts().keys(),
+    #                                  values = df['NAME_EDUCATION_TYPE'].value_counts().values)])
+    #
+    #     st.plotly_chart(pie, use_container_width=True)
 
 # ----- END : MAIN CODE -----
