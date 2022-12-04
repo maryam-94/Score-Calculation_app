@@ -21,7 +21,7 @@ df_bureau_and_balance = load_bureau_and_balance()
 
 # ----- BEGIN : MAIN CODE -----
 with st.container():
-    tab1, tab2, tab3 = st.tabs(["Basic Search", "Advanced Search", "More information"])
+    tab1, tab2, tab3 = st.tabs(["Basic Search", "Advanced Search", "Simulation credit"])
 
     with tab1:
         selectedClientId1 = commun_search_client_form(df)
