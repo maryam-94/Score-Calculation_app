@@ -34,11 +34,11 @@ messageFormat = "%(asctime)s %(message)s"
 # Default: true
 caching = true
 
-# If false, makes your Streamlit script not draw to a Streamlit app.
+# If false, makes your Streamlit script not draw to a Streamlit src.
 # Default: true
 displayEnabled = true
 
-# Controls whether uncaught app exceptions are displayed in the browser. By default, this is set to True and Streamlit displays app exceptions and associated tracebacks in the browser.
+# Controls whether uncaught src exceptions are displayed in the browser. By default, this is set to True and Streamlit displays src exceptions and associated tracebacks in the browser.
 # If set to False, an exception will result in a generic message being shown in the browser, and exceptions and tracebacks will be printed to the console only.
 # Default: true
 showErrorDetails = true
@@ -46,7 +46,7 @@ showErrorDetails = true
 
 [runner]
 
-# Allows you to type a variable or string by itself in a single line of Python code to write it to the app.
+# Allows you to type a variable or string by itself in a single line of Python code to write it to the src.
 # Default: true
 magicEnabled = true
 
@@ -58,7 +58,7 @@ installTracer = false
 # Default: true
 fixMatplotlib = true
 
-# Run the Python Garbage Collector after each script execution. This can help avoid excess memory use in Streamlit apps, but could introduce delay in rerunning the app script for high-memory-use applications.
+# Run the Python Garbage Collector after each script execution. This can help avoid excess memory use in Streamlit apps, but could introduce delay in rerunning the src script for high-memory-use applications.
 # Default: true
 postScriptGC = true
 
@@ -129,7 +129,7 @@ enableWebsocketCompression = false
 
 [browser]
 
-# Internet address where users should point their browsers in order to connect to the app. Can be IP address or DNS name and path.
+# Internet address where users should point their browsers in order to connect to the src. Can be IP address or DNS name and path.
 # This is used to: - Set the correct URL for CORS and XSRF protection purposes. - Show the URL on the terminal - Open the browser
 # Default: 'localhost'
 serverAddress = "localhost"
@@ -138,7 +138,7 @@ serverAddress = "localhost"
 # Default: true
 gatherUsageStats = true
 
-# Port where users should point their browsers in order to connect to the app.
+# Port where users should point their browsers in order to connect to the src.
 # This is used to: - Set the correct URL for CORS and XSRF protection purposes. - Show the URL on the terminal - Open the browser
 # Default: whatever value is set in server.port.
 serverPort = 8501
@@ -179,5 +179,5 @@ showPyplotGlobalUse = true
 # Color used for almost all text.
 # textColor =
 
-# Font family for all text in the app, except code blocks. One of "sans serif", "serif", or "monospace".
+# Font family for all text in the src, except code blocks. One of "sans serif", "serif", or "monospace".
 # font =

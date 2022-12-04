@@ -3,7 +3,7 @@ import gc
 import pickle
 
 df_bureau_path = "../bureau.csv"
-agg_bureau_for_app_path = r'./data/bureau_for_app.pickle'
+agg_bureau_for_app_path = r'../data/bureau_for_app.pickle'
 
 # Preprocess bureau.csv and bureau_balance.csv
 def bureau_for_app(num_rows=None, nan_as_category=True):
