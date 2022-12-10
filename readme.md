@@ -8,7 +8,7 @@ https://discuss.streamlit.io/t/toml-docoder-error/1400
 ### to update requirements:
 
 ````commandline
-pipreqs --force 
+pipreqs --force
 ````
 
 ### To run project:

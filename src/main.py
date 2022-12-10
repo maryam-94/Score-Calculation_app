@@ -26,6 +26,8 @@ with st.container():
     with tab1:
         selectedClientId1 = commun_search_client_form(df)
         show_client_application_info(df, selectedClientId1)
+
+
         show_credit_bureau_info(df_bureau_and_balance, selectedClientId1)
     with tab2:
         selectedClientId2 = advanced_search_client_form(df)
