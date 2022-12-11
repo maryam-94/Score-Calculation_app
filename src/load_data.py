@@ -4,9 +4,8 @@ import pandas as pd
 # ----- BEGIN : load_data -----
 @st.cache
 def load_data():
-    data = pd.read_pickle(r'data/data_for_dashboard.pickle')
+    data = pd.read_pickle(r'data/df_application_test_for_dashbord.pickle')
     data.reset_index(drop=True, inplace=True)
-    # data['Date'] = pd.to_datetime(data['Date']).dt.strftime('%Y-%m-%d')
     return data
 
 @st.cache

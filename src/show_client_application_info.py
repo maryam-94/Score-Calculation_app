@@ -2,18 +2,25 @@ import streamlit as st
 import plotly.express as px  # interactive charts
 import plotly.figure_factory as ff
 import plotly.graph_objs as go
+from show_client_prediction import *
+
 
 # ----- BEGIN : show_client_application_info -----
-def show_client_application_info(df, selectedClientId):
+def show_client_application_info(df, selectedClientId, tab):
     st.write('<i class="fa-solid fa-square-poll-horizontal"></i> Client application data :', unsafe_allow_html=True)
     clientDf = df[df['SK_ID_CURR'] == selectedClientId]
 
     show_client_personal_info(df, clientDf, selectedClientId)
     st.empty()
     show_client_chart_comparison(df, clientDf['NAME_EDUCATION_TYPE'].iloc[0])
-    show_client_prediction_results(clientDf)
     with st.expander("See More:"):
         st.write(df[df['SK_ID_CURR'] == selectedClientId])
+    st.empty()
+    st.markdown("""---""")
+    st.write('<i class="fa-solid fa-play"></i> Client Credit prediction:', unsafe_allow_html=True)
+    show_client_prediction(clientDf,tab)
+
+
 # ----- END : show_client_application_info -----
 
 
@@ -32,8 +39,8 @@ def show_client_personal_info(df, clientDf, selectedClientId):
     </div>
     """
 
-    gender = "Female" if clientDf['CODE_GENDER_y'].iloc[0] == 'F' else "Male"
-    gender_icon = "fa-person-dress" if clientDf['CODE_GENDER_y'].iloc[0] == 'F' else "fa-person"
+    gender = "Female" if clientDf['CODE_GENDER'].iloc[0] == 'F' else "Male"
+    gender_icon = "fa-person-dress" if clientDf['CODE_GENDER'].iloc[0] == 'F' else "fa-person"
     clientInfo = clientInfoTemplate.format(gender_icon, str(selectedClientId), gender,
                                            clientDf['NAME_EDUCATION_TYPE'].iloc[0])
 
@@ -68,12 +75,6 @@ def show_client_personal_info(df, clientDf, selectedClientId):
     )
     col3.metric(label="Credit Amount", value=int(clientDf['AMT_CREDIT']))
 
-def show_client_prediction_results(clientDf):
-    col1, col2, col3 = st.columns(3)
-    col1.metric(label="probabilité que le client rembourse son crédit", value="%.4f" % clientDf['predict_proba_0'])
-    col2.metric(label="probabilité que le client ne rembourse pas son crédit",
-                value="%.4f" % clientDf['predict_proba_1'])
-    col3.metric(label="Difficulté de paiement", value=int(clientDf['y_pred']))
 
 def show_client_chart_comparison(df, clientEducationType):
     fig_col1, fig_col2, fig_col3 = st.columns(3)
@@ -112,12 +113,12 @@ def show_client_chart_comparison(df, clientEducationType):
 
     with fig_col3:
         # fig = px.density_heatmap(
-        #     data_frame=df, y='AMT_CREDIT', x='CODE_GENDER_y'
+        #     data_frame=df, y='AMT_CREDIT', x='CODE_GENDER'
         # )
         # st.write(fig)
 
-        fig = ff.create_distplot([df[df['CODE_GENDER_y'] == 'F']['AMT_CREDIT'],
-                                  df[df['CODE_GENDER_y'] == 'M']['AMT_CREDIT']],
+        fig = ff.create_distplot([df[df['CODE_GENDER'] == 'F']['AMT_CREDIT'],
+                                  df[df['CODE_GENDER'] == 'M']['AMT_CREDIT']],
                                  ['GENDER=> F', 'GENDER=> M'],
                                  bin_size=[2, 2],
                                  show_rug=False,

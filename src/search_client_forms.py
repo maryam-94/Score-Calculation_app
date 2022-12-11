@@ -3,9 +3,9 @@ import pandas as pd
 
 # ----- BEGIN : commun_search_client_form -----
 def commun_search_client_form(df):
-    selectClientDf = df.filter(items=['SK_ID_CURR', 'CODE_GENDER_y', 'NAME_EDUCATION_TYPE'])
+    selectClientDf = df.filter(items=['SK_ID_CURR', 'CODE_GENDER', 'NAME_EDUCATION_TYPE'])
     selectClientDf["SELECT_BOX_TEXT"] = selectClientDf['SK_ID_CURR'].astype(str) + "(gender:" + selectClientDf[
-        "CODE_GENDER_y"] + ", education: " + selectClientDf["NAME_EDUCATION_TYPE"] + ")"
+        "CODE_GENDER"] + ", education: " + selectClientDf["NAME_EDUCATION_TYPE"] + ")"
     selectboxList = list(selectClientDf["SELECT_BOX_TEXT"])
     selectedText = st.selectbox('Select client id', selectboxList)
     selectedClientId1 = selectClientDf[selectClientDf['SELECT_BOX_TEXT'] == selectedText]['SK_ID_CURR'].iloc[0]
@@ -16,7 +16,7 @@ def commun_search_client_form(df):
 def advanced_search_client_form(df):
     filter1 = {
         'label': "Select the Gender",
-        'column': 'CODE_GENDER_y'
+        'column': 'CODE_GENDER'
     }
     filter2 = {
         'label': "Select Education type",
